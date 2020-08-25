@@ -36,5 +36,26 @@ app.get('/games', (req, res) => {
   res.json(DB.games);
 });
 
+app.get('/game/:id', (req, res) => {
+ 
+  let { id } = req.params;
+  id = parseInt(id);
+  
+  if (!isNaN(id)) {
+    res.statusCode = 200;
+    let game = DB.games.find(g => g.id === id);
+    
+    if (game === undefined) {
+      res.sendStatus(404);
+    } else {
+      res.json(game);
+    }
+    
+  } else {
+    res.statusCode = 400;
+    res.send('id should be a number!')
+  };  
+});
+
 app.listen(8080);
 
