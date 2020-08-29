@@ -10,7 +10,9 @@ const connection = require('./database');
 connection.authenticate()
 //import model Game
 const Game = require('./Game');
-
+//configure cors
+const cors = require('cors');
+app.use(cors());
 //endpoints
 app.get('/games', (req, res) => {
   (async () => {
