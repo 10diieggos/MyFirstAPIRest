@@ -6,8 +6,23 @@
   <title>Game</title>
 </head>
 <body>
-  <ul id="getGames"></ul>
+  <table>
+    <thead>
+      <th>id</th>
+      <th>Game</th>
+      <th>Ano</th>
+      <th>Preço</th>
+    </thead>
+    <tbody id="getGames"></tbody>
+  </table>
   <hr>
+  <h3>Insert new Game</h3>
+
+    <input type="text" id="posttitle" name="title" placeholder="title">
+    <input type="text" id="postyear" name="year" placeholder="year">
+    <input type="text" id="postprice" name="price" placeholder="price"><br><br>
+    <button onclick="insertGame()">Insert</button>
+
   <hr>
   <hr>
 </body>
@@ -15,13 +30,62 @@
 <script>
 
   (async function getGames() {
+    
     let response = await axios.get('http://localhost/games');
-    console.log(response)
-    let games = document.getElementById('getGames')
-    let game =  document.createElement('li')
-    game.innerHTML = JSON.stringify(response)
-    games.appendChild(game)
+    
+    let table = document.getElementById('getGames')
+    response.data.forEach(game => {
+      let {id, title, year, price} = game
+      let row =  document.createElement('tr')
+      table.appendChild(row)
+      //creating cells and appending into row
+      let cellid = document.createElement('td')
+      row.appendChild(cellid)
+      let celltitle = document.createElement('td')
+      row.appendChild(celltitle)
+      let cellyear = document.createElement('td')
+      row.appendChild(cellyear)
+      let cellprice = document.createElement('td')
+      row.appendChild(cellprice)
+      //creating textNode and appending into cells
+      id = document.createTextNode(id)
+      cellid.appendChild(id)
+      title = document.createTextNode(title)
+      celltitle.appendChild(title)
+      year = document.createTextNode(year)
+      cellyear.appendChild(year)
+      price = document.createTextNode(price)
+      cellprice.appendChild(price)
+      
+      let btndelete = document.createElement('BUTTON')
+      row.appendChild(btndelete)
+      btndelete.appendChild(document.createTextNode('Delete'))
+      let btnedit = document.createElement('BUTTON')
+      row.appendChild(btnedit)
+      btnedit.appendChild(document.createTextNode('Edit'))
+      btndelete.addEventListener('click',() => {return deleteGame(id.data)});
+      btnedit.addEventListener('click',() => {return editGame(id.data)});
+    })
   })();
+
+ async function insertGame(){
+    let title = document.getElementById('posttitle').value;
+    let year = document.getElementById('postyear').value;
+    let price = document.getElementById('postprice').value;
+    
+    price = parseInt(price)
+    year = parseInt(year)
+
+    await axios.post('http://localhost/game', {title, year, price} )
+    location.reload()
+
+  };
+  function deleteGame(id){
+    console.log(`${id} deleted`);
+  };
+  function editGame(id){
+    console.log(`${id} edited`);
+  };
 
 </script>
 </html>
