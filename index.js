@@ -41,7 +41,10 @@ app.get('/game/:id', (req, res) => {
   let { id } = req.params;
   id = parseInt(id);
   
-  if (!isNaN(id)) {
+  if (isNaN(id)) {
+    res.statusCode = 400;
+    res.send('id should be a number!')
+  } else {
     res.statusCode = 200;
     let game = DB.games.find(g => g.id === id);
     
@@ -50,12 +53,17 @@ app.get('/game/:id', (req, res) => {
     } else {
       res.json(game);
     }
-    
-  } else {
-    res.statusCode = 400;
-    res.send('id should be a number!')
+
   };  
+
 });
 
-app.listen(8080);
+app.post('/game', (req, res) => {
+  let { id, title, year, price } = req.body;
+  let game = { id, title, year, price };
+  DB.games.push(game);
+  res.sendStatus(200);
+});
 
+//run server
+app.listen(80);
