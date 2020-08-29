@@ -82,9 +82,38 @@ app.delete('/game/:id', (req, res) => {
       DB.games.splice(index, 1);
       res.sendStatus(200);
     };
-
+    
   };
+  
+});
 
+app.put('/game/:id', (req, res) => {
+ 
+  let { id } = req.params;
+  id = parseInt(id);
+  
+  if (isNaN(id)) {
+    res.statusCode = 400;
+    res.send('id should be a number!')
+  
+  } else {
+    let game = DB.games.find(game => game.id === id);
+    
+    if (game === undefined) {
+      res.sendStatus(404);
+    
+    } else {
+      let { title, year, price } = req.body;
+
+      if (title != undefined) { game.title = title };
+      if (year != undefined) { game.year = year };
+      if (price != undefined) { game.price = price };
+
+      res.sendStatus(200);
+    }
+    
+  };  
+  
 });
 
 //run server
