@@ -17,13 +17,21 @@
   </table>
   <hr>
   <h3>Insert new Game</h3>
-
-    <input type="text" id="posttitle" name="title" placeholder="title">
-    <input type="text" id="postyear" name="year" placeholder="year">
-    <input type="text" id="postprice" name="price" placeholder="price"><br><br>
-    <button onclick="insertGame()">Insert</button>
-
+  
+  <input type="text" id="posttitle" name="title" placeholder="title">
+  <input type="text" id="postyear" name="year" placeholder="year">
+  <input type="text" id="postprice" name="price" placeholder="price"><br><br>
+  <button onclick="insertGame()">Insert</button>
+  
   <hr>
+  <h3>Edit Game</h3>
+
+    <input type="hidden" id="editid" name="id">
+    <input type="text" id="edittitle" name="title" placeholder="title">
+    <input type="text" id="edityear" name="year" placeholder="year">
+    <input type="text" id="editprice" name="price" placeholder="price"><br><br>
+    <button onclick="editGame()">Edit</button>
+
   <hr>
 </body>
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
@@ -64,28 +72,60 @@
       row.appendChild(btnedit)
       btnedit.appendChild(document.createTextNode('Edit'))
       btndelete.addEventListener('click',() => {return deleteGame(id.data)});
-      btnedit.addEventListener('click',() => {return editGame(id.data)});
+      btnedit.addEventListener('click',() => {return callGame(id.data)});
     })
   })();
-
- async function insertGame(){
+  
+  async function insertGame(){
     let title = document.getElementById('posttitle').value;
     let year = document.getElementById('postyear').value;
     let price = document.getElementById('postprice').value;
     
     price = parseInt(price)
     year = parseInt(year)
-
+    
     await axios.post('http://localhost/game', {title, year, price} )
     location.reload()
+    
+  };
+  async function deleteGame(id){
+    id = parseInt(id)
+    await axios.delete(`http://localhost/game/${id}`)
+    location.reload()
+  };
+  async function callGame(id){
+    id = parseInt(id)
+    let editid = document.getElementById('editid');
+    let edittitle = document.getElementById('edittitle');
+    let edityear = document.getElementById('edityear');
+    let editprice = document.getElementById('editprice');
+    
+    let response = await axios.get(`http://localhost/game/${id}`);
+    
+    let { title, year, price } = response.data;
+    editid.value = id
+    edittitle.value = title
+    edityear.value = year
+    editprice.value = price
+    
+};
 
-  };
-  function deleteGame(id){
-    console.log(`${id} deleted`);
-  };
-  function editGame(id){
-    console.log(`${id} edited`);
-  };
+async function editGame(){
+  let title = document.getElementById('edittitle').value;
+  let year = document.getElementById('edityear').value;
+  let price = document.getElementById('editprice').value;
+  
+  let id = document.getElementById('editid').value;
+
+  id = parseInt(id)
+  console.log(id);
+
+  await axios.put(`http://localhost/game/${id}`,{ title, year, price});
+  
+  location.reload();
+};
+
+
 
 </script>
 </html>
