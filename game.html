@@ -6,6 +6,13 @@
   <title>Game</title>
 </head>
 <body>
+
+  <input type="email" name="email" id="email" placeholder="API user" required>
+  <input type="password" name="password" id="password" placeholder="password" required><br><br>
+  <button onclick="signUpOrIn('authentication')">Sign In</button>
+  <button onclick="signUpOrIn('user')">Sign Up</button>
+
+  <hr>
   <table>
     <thead>
       <th>id</th>
@@ -37,9 +44,25 @@
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script>
 
+  let axiosConfig = {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem('token')}`
+    }
+  }
+
+  async function signUpOrIn(endpoint) {
+    let email = document.getElementById('email').value;
+    let password = document.getElementById('password').value;
+    let response = await axios.post(`http://localhost/${endpoint}`, { email, password });
+    let token = (response.data.token);
+    localStorage.setItem('token', token);
+    axiosConfig.headers.Authorization = `Bearer ${token}}`
+    alert(response.data.message);
+  }
+
   (async function getGames() {
     
-    let response = await axios.get('http://localhost/games');
+    let response = await axios.get('http://localhost/games', axiosConfig);
     
     let table = document.getElementById('getGames')
     response.data.forEach(game => {
@@ -84,13 +107,13 @@
     price = parseInt(price)
     year = parseInt(year)
     
-    await axios.post('http://localhost/game', {title, year, price} )
+    await axios.post('http://localhost/game', {title, year, price}, axiosConfig)
     location.reload()
     
   };
   async function deleteGame(id){
     id = parseInt(id)
-    await axios.delete(`http://localhost/game/${id}`)
+    await axios.delete(`http://localhost/game/${id}`, axiosConfig)
     location.reload()
   };
   async function callGame(id){
@@ -100,7 +123,7 @@
     let edityear = document.getElementById('edityear');
     let editprice = document.getElementById('editprice');
     
-    let response = await axios.get(`http://localhost/game/${id}`);
+    let response = await axios.get(`http://localhost/game/${id}`, axiosConfig);
     
     let { title, year, price } = response.data;
     editid.value = id
@@ -120,7 +143,7 @@ async function editGame(){
   id = parseInt(id)
   console.log(id);
 
-  await axios.put(`http://localhost/game/${id}`,{ title, year, price});
+  await axios.put(`http://localhost/game/${id}`,{ title, year, price}, axiosConfig);
   
   location.reload();
 };

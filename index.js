@@ -1,3 +1,5 @@
+//Caution! Change this for your project!
+let JWTsecret = ',+fH%t<^YTKdd>Js8cKenJO[]0(ql^UZ'
 //initialize express
 const express = require('express');
 const app = express();
@@ -8,13 +10,78 @@ app.use(bodyParser.json());
 //database connection
 const connection = require('./database');
 connection.authenticate()
-//import model Game
+//import models
 const Game = require('./Game');
+const User = require('./User');
 //configure cors
 const cors = require('cors');
 app.use(cors());
+//authentication library (JWT)
+const jwt = require('jsonwebtoken');
+//A library to help you hash passwords.
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
+
+//authentication middleware
+function authentication(req, res, next) {
+  let token = req.headers.authorization;
+  token = token.split(' ');
+  token = token[1]
+  jwt.verify(token, JWTsecret, function(err, decoded) {
+    if (err) {
+      res.sendStatus(401)
+    } else {
+      req.decoded = decoded
+      next()
+    }
+  });
+};
+
 //endpoints
-app.get('/games', (req, res) => {
+app.post('/user', (req, res) => {
+  (async () => { 
+    let { email, password } = req.body;
+    let user = await User.findOne({ where: { email } });
+    console.log(user);
+    if (user) {
+      res.send('user already registered');
+      res.statusCode = 412;
+    } else {
+      bcrypt.genSalt(saltRounds, function (err, salt) {
+        bcrypt.hash(password, salt, function (err, hash) {
+          User.create({ email, password: hash });
+          res.json({ token: 'invalid', message:'Registered succes!' });
+          res.statusCode = 200;
+        });
+      });
+    }
+  })();
+});
+
+app.post('/authentication', (req,res) => {
+  (async () => { 
+    let { email, password } = req.body;
+    let hash = await User.findOne({ where: { email } });
+    if (hash) {
+      hash = (hash.dataValues.password);
+      bcrypt.compare(password, hash, function(err, result) {
+        if (result) {
+          jwt.sign({ email, password }, JWTsecret, { expiresIn: '1d' }, (err, token) => {
+            res.json({ token, message:'logon success!' });
+          });
+        } else {
+          res.json({ token: 'invalid', message:'password incorrect!' });
+          res.statusCode = 401;
+        }
+      });      
+    } else {
+      res.json({token:'invalid', message: 'User not found!'})
+      res.statusCode = 404
+    }
+  })();  
+});
+
+app.get('/games', authentication, (req, res) => {
   (async () => {
     const games = await Game.findAll()
     res.json(games);
@@ -22,7 +89,7 @@ app.get('/games', (req, res) => {
   res.statusCode = 200;
 });
 
-app.get('/game/:id', (req, res) => {
+app.get('/game/:id', authentication, (req, res) => {
   let { id } = req.params;
   id = parseInt(id);
   if (isNaN(id)) {
@@ -41,7 +108,7 @@ app.get('/game/:id', (req, res) => {
   };  
 });
 
-app.post('/game', (req, res) => {
+app.post('/game', authentication, (req, res) => {
   let { title, year, price } = req.body;
   
   Game.create({ title, year, price });
@@ -49,7 +116,7 @@ app.post('/game', (req, res) => {
   
 });
 
-app.delete('/game/:id', (req, res) => {
+app.delete('/game/:id', authentication, (req, res) => {
   let { id } = req.params;
   id = parseInt(id);
   if (isNaN(id)) {
@@ -69,7 +136,7 @@ app.delete('/game/:id', (req, res) => {
   
 });
 
-app.put('/game/:id', (req, res) => {
+app.put('/game/:id', authentication, (req, res) => {
   let { id } = req.params;
   id = parseInt(id);
   if (isNaN(id)) {
