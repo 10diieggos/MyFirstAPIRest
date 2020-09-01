@@ -25,16 +25,61 @@ const saltRounds = 10;
 //authentication middleware
 function authentication(req, res, next) {
   let token = req.headers.authorization;
-  token = token.split(' ');
-  token = token[1]
-  jwt.verify(token, JWTsecret, function(err, decoded) {
-    if (err) {
-      res.sendStatus(401)
-    } else {
-      req.decoded = decoded
-      next()
-    }
-  });
+  if (!token) {
+    res.sendStatus(401);
+  } else {
+    token = token.split(' ');
+    token = token[1]
+    jwt.verify(token, JWTsecret, function(err, decoded) {
+      if (err) {
+        res.sendStatus(401)
+      } else {
+        req.decoded = decoded
+        next()
+      }
+    });
+  }
+};
+
+//HATEOAS
+let HATEOAS = (id) => {
+  return [
+    {
+      href: 'http://localhost/user',
+      method: 'POST',
+      rel: 'post_user'
+    },
+    {
+      href: 'http://localhost/authentication',
+      method: 'POST',
+      rel: 'post_authentication'
+    },
+    {
+      href: 'http://localhost/games',
+      method: 'GET',
+      rel: 'get_games'
+    },
+    {
+      href: `http://localhost/game/${id}`,
+      method: 'GET',
+      rel: `get_game_${id}`
+    },
+    {
+      href: `http://localhost/game/${id}`,
+      method: 'POST',
+      rel: `post_game_${id}`
+    },
+    {
+      href: `http://localhost/game/${id}`,
+      method: 'DELETE',
+      rel: `delete_game_${id}`
+    },
+    {
+      href: `http://localhost/game/${id}`,
+      method: 'PUT',
+      rel: `put_game_${id}`
+    },
+    ]
 };
 
 //endpoints
@@ -84,7 +129,7 @@ app.post('/authentication', (req,res) => {
 app.get('/games', authentication, (req, res) => {
   (async () => {
     const games = await Game.findAll()
-    res.json(games);
+    res.json({games, _links: HATEOAS(':id') });
   })();
   res.statusCode = 200;
 });
@@ -101,7 +146,7 @@ app.get('/game/:id', authentication, (req, res) => {
       if (game === undefined) {
         res.sendStatus(404);
       } else {
-        res.json(game);
+        res.json({ game, _links: HATEOAS(id) });
         res.statusCode = 200;
       }
     })();
@@ -157,5 +202,7 @@ app.put('/game/:id', authentication, (req, res) => {
     })();
   };  
 });
+
+
 //run server
 app.listen(80);

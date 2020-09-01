@@ -50,6 +50,8 @@
     }
   }
 
+  let HATEOAS = ""
+
   async function signUpOrIn(endpoint) {
     let email = document.getElementById('email').value;
     let password = document.getElementById('password').value;
@@ -65,7 +67,7 @@
     let response = await axios.get('http://localhost/games', axiosConfig);
     
     let table = document.getElementById('getGames')
-    response.data.forEach(game => {
+    response.data.games.forEach(game => {
       let {id, title, year, price} = game
       let row =  document.createElement('tr')
       table.appendChild(row)
@@ -97,8 +99,12 @@
       btndelete.addEventListener('click',() => {return deleteGame(id.data)});
       btnedit.addEventListener('click',() => {return callGame(id.data)});
     })
+
+    console.log(response.data._links); 
+
   })();
   
+
   async function insertGame(){
     let title = document.getElementById('posttitle').value;
     let year = document.getElementById('postyear').value;
@@ -116,6 +122,7 @@
     await axios.delete(`http://localhost/game/${id}`, axiosConfig)
     location.reload()
   };
+
   async function callGame(id){
     id = parseInt(id)
     let editid = document.getElementById('editid');
@@ -125,7 +132,7 @@
     
     let response = await axios.get(`http://localhost/game/${id}`, axiosConfig);
     
-    let { title, year, price } = response.data;
+    let { title, year, price } = response.data.game;
     editid.value = id
     edittitle.value = title
     edityear.value = year
