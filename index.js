@@ -205,4 +205,4 @@ app.put('/game/:id', authentication, (req, res) => {
 
 
 //run server
-app.listen(80);
+app.listen(3000);
