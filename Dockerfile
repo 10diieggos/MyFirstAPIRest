@@ -39,7 +39,7 @@ COPY . $HOME/MyFirstAPIRest/
 # dando permissão para o usuário rodar a app
 RUN chown -R app:app $HOME/*
 
-# tirando do contexto do root para o usuário
+# reconfigurando app como o usuárioo padrãoo da imagem
 USER app
 
 #configurando o comando que deve ser rodado quando o container subir
@@ -48,3 +48,4 @@ CMD [ "npm", "start" ]
 # Video1
 # Tudo o que você precisa saber para rodar Node.js com Docker
 # https://www.youtube.com/watch?v=-StV4sf9N0g
+# https://walde.co/2016/08/30/tudo-que-voce-precisa-saber-para-rodar-sua-aplicacao-nodejs-com-docker/
