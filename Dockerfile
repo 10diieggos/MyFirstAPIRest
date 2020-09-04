@@ -8,22 +8,22 @@ RUN useradd --user-group --create-home --shell /bin/false app &&\
   npm install --global npm@6.14.8
 
 #criando variável de ambiente para a pasta de trabalho
-ENV HOME=/home/app
+ENV HOME=/home/app/MyFirstAPIRest/
 
 #copiando o gerenciador de dependências para a pasta /home/app/MyFirstAPIRest/ 
 # dentro da imagem
 # utilizando o npm-shrinkwrap.json para garantir as versões das dependências
-COPY package.json npm-shrinkwrap.json $HOME/MyFirstAPIRest/
+COPY package*.json npm-shrinkwrap.json $HOME
 
 # dando permissão para o usuário rodar a app
-RUN chown -R app:app $HOME/*
+RUN chown -R app:app $HOME
 
 # tirando do contexto do root para o usuário
 USER app
 
 # configurando pasta de trabalho do container
 # onde rodam os comandos externos como exec
-WORKDIR $HOME/MyFirstAPIRest/
+WORKDIR $HOME
 
 # limpando arquivos não mais necessaŕios 
 #  e rodando o npm install sem a barra de progresso para
@@ -34,10 +34,10 @@ RUN npm cache clean --force && npm install --silent --progress=false
 USER root
 
 # copiando os arquivos da apilcação
-COPY . $HOME/MyFirstAPIRest/
+COPY . $HOME
 
 # dando permissão para o usuário rodar a app
-RUN chown -R app:app $HOME/*
+RUN chown -R app:app $HOME
 
 # reconfigurando app como o usuárioo padrãoo da imagem
 USER app
