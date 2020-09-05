@@ -1,6 +1,15 @@
 version: '3'
 services: 
+  db:
+    image: mysql:8.0.21
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_DATABASE: gameshop
+
   myfirstapi:
+    depends_on: [ db ]
     build: .
     command: npm run-script dev
     environment: 
@@ -10,7 +19,7 @@ services:
     volumes:
       - .:/home/app/MyFirstAPIRest
       - /home/app/MyFirstAPIRest/node_modules
-    network_mode: bridge
+    restart: always
     
 # Video1
 # Tudo o que você precisa saber para rodar Node.js com Docker

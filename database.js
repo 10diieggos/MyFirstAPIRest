@@ -1,7 +1,7 @@
 const Sequelize = require('sequelize');
 
-const connection = new Sequelize('gamesshop', 'root', '123456', {
-  host: '172.17.0.2', //this is a Docker container on default bridge network of Docker
+const connection = new Sequelize('gameshop', 'root', '123456', {
+  host: 'db', //this is a Docker container on default bridge network of Docker
   dialect: 'mysql',
   timezone: '-03:00'
 });
